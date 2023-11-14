@@ -94,6 +94,8 @@ extension HomeViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         
+        cell.delegate = self
+        
         switch indexPath.section {
         case Sections.TrendingMovies.rawValue:
             APICaller.shared.getTrendingMovies { result in
@@ -157,5 +159,16 @@ extension HomeViewController: UITableViewDataSource {
         header.textLabel?.frame = CGRect(x: header.bounds.origin.x + 20, y: header.bounds.origin.y, width: 100, height: header.bounds.height)
         header.textLabel?.textColor = .white
         header.textLabel?.text = header.textLabel?.text?.capitalizedFirstLetter()
+    }
+}
+
+//MARK: - CollectionViewTableViewCellDelegate
+extension HomeViewController: CollectionViewTableViewCellDelegate {
+    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, viewModel: TitlePreviewViewModel) {
+        DispatchQueue.main.async { [weak self] in
+            let vc = TitlePreviewViewController()
+            vc.configure(with: viewModel)
+            self?.navigationController?.pushViewController(vc, animated: true)
+        }
     }
 }
