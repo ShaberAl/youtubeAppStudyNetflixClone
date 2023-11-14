@@ -52,6 +52,17 @@ class CollectionViewTableViewCell: UITableViewCell {
             self?.collectionView.reloadData()
         }
     }
+    
+    private func downloadTitleAt(indexPath: IndexPath) {
+        DataPersistenceManager.shared.downloadTitleWith(model: titles[indexPath.row]) { result in
+            switch result {
+            case .success():
+                NotificationCenter.default.post(name: NSNotification.Name("downloaded"), object: nil)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
 }
 
 //MARK: - UICollectionViewDelegate
@@ -84,7 +95,7 @@ extension CollectionViewTableViewCell: UICollectionViewDataSource {
             return
         }
         
-        APICaller.shared.getMoview(with: titleName + " trailer") { [weak self] result in
+        APICaller.shared.getMovie(with: titleName + " trailer") { [weak self] result in
             switch result {
             case .success(let videoElement):
                 let title = self?.titles[indexPath.row]
@@ -97,5 +108,15 @@ extension CollectionViewTableViewCell: UICollectionViewDataSource {
                 print(error.localizedDescription)
             }
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let config = UIContextMenuConfiguration(actionProvider:  { [weak self] _ in
+            let downloadAction = UIAction(title: "Download", state: .off) { _ in
+                self?.downloadTitleAt(indexPath: indexPath)
+            }
+            return UIMenu(title: "", options: .displayInline, children: [downloadAction])
+        })
+        return config
     }
 }
